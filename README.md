@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Go Tutorial Part 9
 # Adding cookie flash messages to our user Module
 
@@ -9,3 +10,7 @@
 ### Check out our blog at [tensor-programming.com](http://tensor-programming.com/).
 
 ### Our [Twitter](https://twitter.com/TensorProgram) and our [facebook](https://www.facebook.com/Tensor-Programming-1197847143611799/).
+=======
+# HealthyFoodStore
+A trust based community bartering system
+>>>>>>> 093adbc8bedaa6fa5b54a17fc9c696dde8360c47

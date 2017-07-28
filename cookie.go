@@ -10,9 +10,9 @@ func setSession(u *User, w http.ResponseWriter) {
 		"pass": u.Password,
 		"firstname": u.Fname,
 	}
-	if encoded, err := cookieHandler.Encode("session", value); err == nil {
+	if encoded, err := cookieHandler.Encode("healthyfoodstore", value); err == nil {
 		cookie := &http.Cookie{
-			Name:  "session",
+			Name:  "healthyfoodstore",
 			Value: encoded,
 			Path:  "/",
 		}
@@ -21,9 +21,9 @@ func setSession(u *User, w http.ResponseWriter) {
 }
 
 func getUserName(r *http.Request) (firstname string) {
-	if cookie, err := r.Cookie("session"); err == nil {
+	if cookie, err := r.Cookie("healthyfoodstore"); err == nil {
 		cookieValue := make(map[string]string)
-		if err = cookieHandler.Decode("session", cookie.Value, &cookieValue); err == nil {
+		if err = cookieHandler.Decode("healthyfoodstore", cookie.Value, &cookieValue); err == nil {
 			email := cookieValue["email"]
 			var db, _ = sql.Open("sqlite3", "users.sqlite3")
 		  defer db.Close()
@@ -42,7 +42,7 @@ func getUserName(r *http.Request) (firstname string) {
 
 func clearSession(w http.ResponseWriter) {
 	cookie := &http.Cookie{
-		Name:   "session",
+		Name:   "healthyfoodstore",
 		Value:  "",
 		Path:   "/",
 		MaxAge: -1,

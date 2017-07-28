@@ -3,6 +3,7 @@ package main
 import (
 	"html/template"
 	"net/http"
+	"fmt"
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/securecookie"
@@ -24,8 +25,8 @@ func indexPage(w http.ResponseWriter, r *http.Request) {
 		}
 	} else {
 		u := &User{}
-		tmpl, _ := template.ParseFiles("base.html", "index.html", "login.html")
-		err := tmpl.ExecuteTemplate(w, "base", u)
+		tmpl, _ := template.ParseFiles("base.html", "index.html", "login.html", "buy.html")
+		err := tmpl.ExecuteTemplate(w, "buy", u)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
@@ -53,9 +54,9 @@ func login(w http.ResponseWriter, r *http.Request) {
 func signup(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
-		tmpl, _ := template.ParseFiles("signup.html", "index.html", "base.html")
+		tmpl, _ := template.ParseFiles("signup.html", "index.html")
 		u := &User{}
-		tmpl.ExecuteTemplate(w, "base", u)
+		tmpl.ExecuteTemplate(w, "signup", u)
 	case "POST":
 		f := r.FormValue("fName")
 		l := r.FormValue("lName")
@@ -63,10 +64,11 @@ func signup(w http.ResponseWriter, r *http.Request) {
 		pass := r.FormValue("password")
 		u := &User{Fname: f, Lname: l, Email: em, Password: pass}
 		if !userExists(u){
+			fmt.Println("Creating new user")
 			createUser(u)
-			http.Redirect(w, r, "/", 302)
-		}
-		if userExists(u){
+			http.Redirect(w, r, "/buy", 302)
+		} else {
+			fmt.Println("User already exists")
 			setMsg(w, "message", []byte("Email already in use!"))
 			http.Redirect(w, r, "/", 302)
 		}

@@ -47,9 +47,27 @@ func userReal(u *User) bool {
   return false
 }
 
+func userExists(u *User) bool {
+	var db, _ = sql.Open("sqlite3", "users.sqlite3")
+	defer db.Close()
+	var em string
+	q, err := db.Query("select email, password from users where email = '" + u.Email +"'")
+	if err != nil {
+		return false
+	}
+	for q.Next(){
+		q.Scan(&em)
+	}
+	if em == u.Email{
+		return true
+	}
+  return false
+}
+
 func createUser(u *User) error {
 	var db, _ = sql.Open("sqlite3", "users.sqlite3")
 	defer db.Close()
+	//if userExists
 	db.Exec("create table if not exists users (email text, password text, firstname text, lastname text, credit real)")
 	tx, _ := db.Begin()
 	stmt, _ := tx.Prepare("insert into users (email, password, firstname, lastname, credit) values (?, ?, ?, ?, ?)")

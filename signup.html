@@ -2,9 +2,8 @@
 <head>
     {{template "header" .}}
 </head>
-
 <div class="container">
-    <form  method="POST" action="/signup">
+    <form method="POST" action="/signup">
       <h1>Please enter your details:</h1>
         <label class="form-control-label" for="fName">First Name</label>
         <input class="form-control" type="text" id="fName" name="fName">
@@ -23,8 +22,9 @@
 </div>
 <div class="container">
   <form  method="POST" action="/login">
-    <h1>Or if you already have an account:</h1>
+    <h1>Or, if you already have an account:</h1>
     <button class="btn btn-primary" type="submit">Log In</button>
   </form>
 </div>
+{{template "footer" .}}
 {{end}}

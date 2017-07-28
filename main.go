@@ -18,7 +18,7 @@ var router = mux.NewRouter()
 func indexPage(w http.ResponseWriter, r *http.Request) {
 	msg, _ := getMsg(w, r, "message")
 	if msg != nil {
-		tmpl, _ := template.ParseFiles("base.html", "index.html", "login.html", "flash.html")
+		tmpl, _ := template.ParseFiles("base.html", "index.html", "login.html")
 		err := tmpl.ExecuteTemplate(w, "base", msg)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -34,21 +34,28 @@ func indexPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func login(w http.ResponseWriter, r *http.Request) {
-	email := r.FormValue("email")
-	pass := r.FormValue("password")
-	u := &User{Email: email, Password: pass}
-	redirect := "/"
-	if email != "" && pass != "" {
-		if userReal(u) == true {
-			setSession(u, w)
-			redirect = "/buy"
-		} else {
-			setMsg(w, "message", []byte("Please signup or enter a valid email and password!"))
+	switch r.Method {
+	case "GET":
+		tmpl, _ := template.ParseFiles("login.html", "index.html")
+		u := &User{}
+		tmpl.ExecuteTemplate(w, "login", u)
+	case "POST":
+		email := r.FormValue("email")
+		pass := r.FormValue("password")
+		u := &User{Email: email, Password: pass}
+		redirect := "/login"
+		if email != "" && pass != "" {
+			if userReal(u) == true {
+				setSession(u, w)
+				redirect = "/buy"
+				} else {
+					setMsg(w, "message", []byte("Please signup or enter a valid email and password!"))
+				}
+				} else {
+					setMsg(w, "message", []byte("Email or Password field are empty!"))
+				}
+				http.Redirect(w, r, redirect, 302)
 		}
-	} else {
-		setMsg(w, "message", []byte("Email or Password field are empty!"))
-	}
-	http.Redirect(w, r, redirect, 302)
 }
 
 func signup(w http.ResponseWriter, r *http.Request) {
@@ -110,8 +117,8 @@ func sell(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("assets"))))
-	router.HandleFunc("/", indexPage)
-	router.HandleFunc("/login", login).Methods("POST")
+	router.HandleFunc("/", login)
+	router.HandleFunc("/login", login).Methods("POST", "GET")
 	router.HandleFunc("/logout", logout).Methods("POST")
 	router.HandleFunc("/buy", buy)
 	router.HandleFunc("/sell", sell)

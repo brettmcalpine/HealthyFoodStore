@@ -1,16 +1,22 @@
 {{define "login"}}
-<h1 class="alert alert-info">Login</h1>
+<head>
+    {{template "header" .}}
+</head>
 <div class="container">
-    {{block "flash" .}} {{end}}
     <form method="POST" action="/login">
-        <label class="form-control" for="email">Email</label>
+      <h1>Please enter your details:</h1>
+        <label class="form-control-label" for="email">Email</label>
         <input class="form-control" type="text" id="email" name="email">
-        <label class="form-control" for="password">Password</label>
+        <label class="form-control-label" for="password">Password</label>
         <input class="form-control" type="password" id="password" name="password">
-        <button class="btn btn-info" type="submit">Submit</button>
+        <button class="btn btn-primary" type="submit">Submit</button>
     </form>
 </div>
-<div class="alert alert-info" role="alert">
-    <a class="alert-link" href="/signup">Sign Up</a>
+<div class="container">
+  <form  method="POST" action="/signup">
+    <h1>Or, if you don't yet have an account:</h1>
+    <button class="btn btn-primary" type="submit">Sign Up</button>
+  </form>
 </div>
+{{template "footer" .}}
 {{end}}

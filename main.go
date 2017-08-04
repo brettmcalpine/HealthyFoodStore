@@ -48,13 +48,14 @@ func login(w http.ResponseWriter, r *http.Request) {
 			if userReal(u) == true {
 				setSession(u, w)
 				redirect = "/buy"
-				} else {
-					setMsg(w, "message", []byte("Please signup or enter a valid email and password!"))
-				}
-				} else {
-					setMsg(w, "message", []byte("Email or Password field are empty!"))
-				}
-				http.Redirect(w, r, redirect, 302)
+			} else {
+				setMsg(w, "message", []byte("Please signup or enter a valid email and password!"))
+			}
+		} else {
+			setMsg(w, "message", []byte("Email or Password field are empty!"))
+		}
+		http.Redirect(w, r, redirect, 302)
+
 		}
 }
 

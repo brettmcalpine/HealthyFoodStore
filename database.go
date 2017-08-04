@@ -33,6 +33,7 @@ type Transaction struct{
 func userReal(u *User) bool {
 	var db, _ = sql.Open("sqlite3", "users.sqlite3")
 	defer db.Close()
+	db.Exec("create table if not exists users (email text, password text, firstname text, lastname text, credit real)")
 	var em, pw string
 	q, err := db.Query("select email, password from users where email = '" + u.Email +"'")
 	if err != nil {
@@ -50,6 +51,7 @@ func userReal(u *User) bool {
 func userExists(u *User) bool {
 	var db, _ = sql.Open("sqlite3", "users.sqlite3")
 	defer db.Close()
+	db.Exec("create table if not exists users (email text, password text, firstname text, lastname text, credit real)")
 	var em string
 	q, _ := db.Query("select email from users where email = '" + u.Email +"'")
 	for q.Next(){

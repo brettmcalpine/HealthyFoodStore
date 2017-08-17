@@ -132,23 +132,23 @@ func itemEmpty(i *Item) bool {
   return true
 }
 
-func listItems() error{
+func listItems() []Item{
   var db, _ = sql.Open("sqlite3", "items.sqlite3")
   defer db.Close()
   var it string
   var val float64
   var qty int
-  q, err := db.Query("select itemname, value, quantity from items")
+	var list_of_items []Item
+  q, _ := db.Query("select itemname, value, quantity from items")
   for q.Next(){
     q.Scan(&it, &val, &qty)
-    fmt.Print("Item: ")
-    fmt.Print(it)
-    fmt.Print("\tValue: $")
-    fmt.Printf("%.2f", val)
-    fmt.Print("\tQuantity: ")
-    fmt.Println(qty)
+		var thing Item
+		thing.Itemname = it
+	  thing.Value = val
+	  thing.Quantity = qty
+		list_of_items = append(list_of_items, thing)
   }
-  return err
+  return list_of_items
 }
 
 func assetValue() (float64, error){
@@ -176,19 +176,10 @@ func buyItem(u *User, i *Item, qty int){
   fmt.Println("Welcome to the Healthy Food Store!")
   fmt.Println("----------------------------------\n")
 
-  u := User{"brett.mcalpine@compacsort.com", "password", "Brett", "McAlpine", 0.00}
-  if userEmpty(&u){
-    createUser(&u)
-  }
-  listUsers()
-  fmt.Println("")
-
   i := Item{"Pizza", 3.00, 5}
   if itemEmpty(&i){
     createItem(&i)
   }
-  listItems()
-  fmt.Println("")
 
   var assval, _ = assetValue()
   fmt.Print("Total asset value: $")

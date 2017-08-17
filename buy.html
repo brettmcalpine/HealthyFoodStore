@@ -1,11 +1,32 @@
 {{define "buy"}}
 <html>
 <head>
-    {{template "header" .}}
+  {{template "header" .}}
 </head>
 <body>
-    {{template "body" .}}
-    {{template "footer" .}}
+  {{template "body" .}}
+<div class="flex">
+  {{range .I}}
+
+  <div>
+  </div>
+  <div style="text-align:right">
+    <form action="/buy" method="post">
+      <button class="btn btn-warning" type="submit">Buy a {{.Itemname}}</button>
+  </div>
+  <div style="text-align:left">
+    <h3>for ${{.Value}}.</h3>
+  </div>
+  <div>
+    <h3>There are {{.Quantity}} left.</h3>
+  </div>
+  <div>
+  </div>
+
+  {{end}}
+</div>
+
 </body>
 </html>
+{{template "footer" .}}
 {{end}}

@@ -90,9 +90,15 @@ func logout(w http.ResponseWriter, r *http.Request) {
 
 func buy(w http.ResponseWriter, r *http.Request) {
 	tmpl, _ := template.ParseFiles("buy.html", "index.html", "internal.html")
+	userdata := getUserDetails(r)
 	firstname := getUserName(r)
+	items := listItems()
+	data := struct{
+		U User
+		I []Item
+	}{userdata, items}
 	if firstname != "" {
-		err := tmpl.ExecuteTemplate(w, "buy", &User{Fname: firstname})
+		err := tmpl.ExecuteTemplate(w, "buy", data)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}

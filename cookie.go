@@ -40,6 +40,28 @@ func getUserName(r *http.Request) (firstname string) {
 	return firstname
 }
 
+func getUserDetails(r *http.Request) (u User) {
+	if cookie, err := r.Cookie("healthyfoodstore"); err == nil {
+		cookieValue := make(map[string]string)
+		if err = cookieHandler.Decode("healthyfoodstore", cookie.Value, &cookieValue); err == nil {
+			email := cookieValue["email"]
+			var db, _ = sql.Open("sqlite3", "users.sqlite3")
+		  defer db.Close()
+			var em, fn string
+			var cr float64
+			q, _ := db.Query("select email, firstname, credit from users")
+			for q.Next(){
+				q.Scan(&em, &fn, &cr)
+				if em == email{
+					u := User{Fname: fn, Email: em, Credit: cr}
+					return u
+				}
+			}
+		}
+	}
+	return u
+}
+
 func clearSession(w http.ResponseWriter) {
 	cookie := &http.Cookie{
 		Name:   "healthyfoodstore",

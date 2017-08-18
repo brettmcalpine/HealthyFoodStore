@@ -89,7 +89,7 @@ func logout(w http.ResponseWriter, r *http.Request) {
 }
 
 func buy(w http.ResponseWriter, r *http.Request) {
-	tmpl, _ := template.ParseFiles("buy.html", "index.html", "internal.html")
+	tmpl, _ := template.ParseFiles("buy.html", "shopheader.html", "footer.html")
 	userdata := getUserDetails(r)
 	firstname := getUserName(r)
 	items := listItems()

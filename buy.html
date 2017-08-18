@@ -1,32 +1,26 @@
 {{define "buy"}}
-<html>
-<head>
-  {{template "header" .}}
-</head>
-<body>
-  {{template "body" .}}
-<div class="flex">
-  {{range .I}}
+{{template "header" .}}
+  <div class="table-wrapper">
+    <table>
+      <thead>
+      <tr>
+        <th>Item (Click to buy 1)</th>
+        <th>Price (incl. <a href="help">tax</a>)</h>
+        <th>Stock <a href="shopkeeping">is this correct?</a></td>
+      </thead>
+      <tbody>
+        {{range .I}}
+        <tr>
+        <form action="/buy" method="post">
+          <td><button class="btn btn-warning" type="submit">{{.Itemname}}</button></td>
+        </form>
+        <td>${{.Value}}</td>
+        <td>{{.Quantity}}</td>
+        </tr>
+        {{end}}
+      </tbody>
+    </table>
+  </div>
 
-  <div>
-  </div>
-  <div style="text-align:right">
-    <form action="/buy" method="post">
-      <button class="btn btn-warning" type="submit">Buy a {{.Itemname}}</button>
-  </div>
-  <div style="text-align:left">
-    <h3>for ${{.Value}}.</h3>
-  </div>
-  <div>
-    <h3>There are {{.Quantity}} left.</h3>
-  </div>
-  <div>
-  </div>
-
-  {{end}}
-</div>
-
-</body>
-</html>
 {{template "footer" .}}
 {{end}}

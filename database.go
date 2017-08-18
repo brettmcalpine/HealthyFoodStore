@@ -176,9 +176,9 @@ func buyItem(u *User, i *Item, qty int){
   fmt.Println("Welcome to the Healthy Food Store!")
   fmt.Println("----------------------------------\n")
 
-  i := Item{"Pizza", 3.00, 5}
-  if itemEmpty(&i){
-    createItem(&i)
+	j := Item{"Coke", 1.00, 30}
+  if itemEmpty(&j){
+    createItem(&j)
   }
 
   var assval, _ = assetValue()

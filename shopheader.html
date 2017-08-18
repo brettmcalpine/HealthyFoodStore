@@ -1,0 +1,36 @@
+
+<!DOCTYPE HTML>
+<!--
+	Projection by TEMPLATED
+	templated.co @templatedco
+	Released for free under the Creative Commons Attribution 3.0 license (templated.co/license)
+-->
+{{ define "header"}}
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<title>Healthy Food Store</title>
+		<link rel="icon" sizes="192x192" href="assets/images/favicon-192x192.png" type="image/png" />
+		<link rel="shortcut icon" href="assets/images/favicon.ico">
+  </head>
+	<body>
+		<header id="header">
+			<div class="inner">
+				<a href="buy" class="logo"><strong>Healthy Food Store</strong></a>
+				<a href="account">Welcome, {{.U.Fname}}</a>
+				<a href="account">Balance ${{.U.Credit}}</a>
+				<nav id="nav">
+					<a href="logout"><span class="icon fa-sign-out">Logout {{.U.Email}}</a>
+					<a href="buy"><span class="icon fa-cart-arrow-down"></span> Buy</a>
+					<a href="sell"><span class="icon fa-money"></span> Sell</a>
+					<a href="shopkeeping"><span class="icon fa-sliders"> Shopkeeping</a>
+					<a href="account"><span class="icon fa-line-chart"></span> Account</a>
+				</nav>
+				<a href="#navPanel" class="navPanelToggle"><span class="fa fa-bars"></span></a>
+			</div>
+		</header>
+			<section id="banner">
+			</section>
+{{end}}

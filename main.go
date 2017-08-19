@@ -117,6 +117,8 @@ func buy(w http.ResponseWriter, r *http.Request) {
 }
 
 func sell(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+		case "GET":
 	tmpl, _ := template.ParseFiles("sell.html", "shopheader.html", "footer.html")
 	userdata := getUserDetails(r)
 	firstname := getUserName(r)
@@ -133,6 +135,13 @@ func sell(w http.ResponseWriter, r *http.Request) {
 	} else {
 		setMsg(w, "message", []byte("Please login first!"))
 		http.Redirect(w, r, "/", 302)
+	}
+	case "POST":
+		i := r.FormValue("sell-item")
+		q := r.FormValue("sell-quantity")
+		firstname := getUserName(r)
+		sellItems(firstname, i, q)
+		http.Redirect(w, r, "/sell", 302)
 	}
 }
 

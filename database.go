@@ -168,16 +168,27 @@ func assetValue() (float64, error){
 
 func buyItem(n string, i string){
 
-	cost := decreaseItemQuantity(i)
+	cost := changeItemQuantity(i, -1)
 
 	var tax float64 = 0.0
 
-	charge := cost + tax
+	charge := -cost - tax
 
-	chargeUser(n, charge)
+	adjustUserCredit(n, charge)
 }
 
-func decreaseItemQuantity(i string) float64{
+func sellItems(n string, i string, q string){
+
+	quantity, _ := strconv.Atoi(q)
+
+	unitprice := changeItemQuantity(i, quantity)
+
+	price := unitprice*float64(quantity)
+
+	adjustUserCredit(n, price)
+}
+
+func changeItemQuantity(i string, q int) float64{
 	var db, _ = sql.Open("sqlite3", "items.sqlite3")
 	defer db.Close()
 
@@ -194,33 +205,28 @@ func decreaseItemQuantity(i string) float64{
 		x.Scan(&it, &val, &qty)
 		if it == i{
 			charge = val
-			newqty = qty-1
+			newqty = qty+q
 		}
 	}
 	r, _ := db.Prepare("update items set quantity = '" + strconv.Itoa(newqty) + "' where itemname = '" + i + "'")
 	r.Exec()
-	fmt.Print(i)
-	fmt.Print(" reduced to ")
-	fmt.Println(newqty)
+	fmt.Sprintf("Item %s changed by %d to %d", i, q, newqty)
 	return charge
 }
 
-func chargeUser(name string, charge float64){
+func adjustUserCredit(name string, charge float64){
 
 	var db, _ = sql.Open("sqlite3", "users.sqlite3")
 	defer db.Close()
 
 	credit := userCredit(name)
 
-	newcredit := credit - charge
+	newcredit := credit + charge
 
 	r, _ := db.Prepare("update users set credit = ? where firstname = '" + name + "'")
 	r.Exec(newcredit)
 
-	fmt.Printf("User %s charged $%6.2f and has a final credit of $%6.2f\n", name, charge, newcredit)
-
-	fmt.Println(userCredit(name))
-
+	fmt.Printf("User %s adjusted by $%6.2f and has a final credit of $%6.2f\n", name, charge, newcredit)
 }
 
 func userCredit(name string)float64{

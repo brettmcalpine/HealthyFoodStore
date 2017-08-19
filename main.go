@@ -36,7 +36,7 @@ func indexPage(w http.ResponseWriter, r *http.Request) {
 func login(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
-		tmpl, _ := template.ParseFiles("login.html", "index.html")
+		tmpl, _ := template.ParseFiles("login.html", "footer.html")
 		u := &User{}
 		tmpl.ExecuteTemplate(w, "login", u)
 	case "POST":
@@ -62,7 +62,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 func signup(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
-		tmpl, _ := template.ParseFiles("signup.html", "index.html")
+		tmpl, _ := template.ParseFiles("signup.html", "footer.html")
 		u := &User{}
 		tmpl.ExecuteTemplate(w, "signup", u)
 	case "POST":
@@ -89,6 +89,8 @@ func logout(w http.ResponseWriter, r *http.Request) {
 }
 
 func buy(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+		case "GET":
 	tmpl, _ := template.ParseFiles("buy.html", "shopheader.html", "footer.html")
 	userdata := getUserDetails(r)
 	firstname := getUserName(r)
@@ -104,15 +106,26 @@ func buy(w http.ResponseWriter, r *http.Request) {
 		}
 	} else {
 		setMsg(w, "message", []byte("Please login first!"))
-		http.Redirect(w, r, "/", 302)
+		http.Redirect(w, r, "/login", 302)
+	}
+	case "POST":
+		i := r.FormValue("item")
+		firstname := getUserName(r)
+		buyItem(firstname, i)
 	}
 }
 
 func sell(w http.ResponseWriter, r *http.Request) {
-	tmpl, _ := template.ParseFiles("base.html", "index.html", "internal.html")
+	tmpl, _ := template.ParseFiles("sell.html", "shopheader.html", "footer.html")
+	userdata := getUserDetails(r)
 	firstname := getUserName(r)
+	items := listItems()
+	data := struct{
+		U User
+		I []Item
+	}{userdata, items}
 	if firstname != "" {
-		err := tmpl.ExecuteTemplate(w, "base", &User{Fname: firstname})
+		err := tmpl.ExecuteTemplate(w, "sell", data)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
@@ -127,7 +140,7 @@ func main() {
 	router.HandleFunc("/", login)
 	router.HandleFunc("/login", login).Methods("POST", "GET")
 	router.HandleFunc("/logout", logout).Methods("POST")
-	router.HandleFunc("/buy", buy)
+	router.HandleFunc("/buy", buy).Methods("POST", "GET")
 	router.HandleFunc("/sell", sell)
 	router.HandleFunc("/signup", signup).Methods("POST", "GET")
 	http.Handle("/", router)

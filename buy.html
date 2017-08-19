@@ -12,7 +12,7 @@
         {{range .I}}
         <tr>
         <form action="/buy" method="post">
-          <td><button class="btn btn-warning" type="submit">{{.Itemname}}</button></td>
+          <td><button class="btn btn-warning" type="submit" value="{{.Itemname}}" name="item">{{.Itemname}}</button></td>
         </form>
         <td>${{.Value}}</td>
         <td>{{.Quantity}}</td>

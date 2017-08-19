@@ -7,6 +7,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
   "fmt"
 	"time"
+	"strconv"
 )
 
 type User struct {
@@ -33,7 +34,7 @@ type Transaction struct{
 func userReal(u *User) bool {
 	var db, _ = sql.Open("sqlite3", "users.sqlite3")
 	defer db.Close()
-	db.Exec("create table if not exists users (email text, password text, firstname text, lastname text, credit real)")
+	db.Exec("create table if not exists users (email text, password text, firstname text, lastname text, credit float)")
 	var em, pw string
 	q, err := db.Query("select email, password from users where email = '" + u.Email +"'")
 	if err != nil {
@@ -165,11 +166,74 @@ func assetValue() (float64, error){
   return totval, err
 }
 
-func buyItem(u *User, i *Item, qty int){
-  var users, _ = sql.Open("sqlite3", "users.sqlite3")
-	defer users.Close()
-  var items, _ = sql.Open("sqlite3", "items.sqlite3")
-	defer items.Close()
+func buyItem(n string, i string){
+
+	cost := decreaseItemQuantity(i)
+
+	var tax float64 = 0.0
+
+	credit := userCredit(n)
+
+	newcredit := credit - cost - tax
+
+	chargeUser(n, newcredit)
+
+	fmt.Println(userCredit(n))
+}
+
+func decreaseItemQuantity(i string) float64{
+	var db, _ = sql.Open("sqlite3", "items.sqlite3")
+	defer db.Close()
+
+	x, _ := db.Query("select itemname, value, quantity from items")
+
+	var it string
+	var val float64
+	var qty int
+
+	var charge float64
+	var newqty int
+
+	for x.Next(){
+		x.Scan(&it, &val, &qty)
+		if it == i{
+			charge = val
+			newqty = qty-1
+		}
+	}
+	r, _ := db.Prepare("update items set quantity = '" + strconv.Itoa(newqty) + "' where itemname = '" + i + "'")
+	fmt.Println(r)
+	r.Exec()
+	return charge
+}
+
+func chargeUser(name string, newcredit float64){
+
+	var db, _ = sql.Open("sqlite3", "users.sqlite3")
+	defer db.Close()
+
+	r, err := db.Prepare("update users set credit = '" + strconv.FormatFloat(newcredit, 'f', 2, 64) + "' where firstname = '" + name + "'")
+	fmt.Println(r)
+	r.Exec(newcredit)
+	fmt.Println(err)
+}
+
+func userCredit(name string)float64{
+	var db, _ = sql.Open("sqlite3", "users.sqlite3")
+	defer db.Close()
+
+	var fn string
+	var cr float64
+	var credit float64
+
+	y, _ := db.Query("select firstname, credit from users")
+	for y.Next(){
+		y.Scan(&fn, &cr)
+		if fn == name{
+			credit = cr
+		}
+	}
+	return credit
 }
 
 /*func main(){  //for debugging I suppose
@@ -189,5 +253,7 @@ func buyItem(u *User, i *Item, qty int){
   var totcash, _ = totalUserCredit()
   fmt.Print("Total cash value: $")
   fmt.Printf("%.2f\n",totcash)
+
+	listUsers()
 
 }*/

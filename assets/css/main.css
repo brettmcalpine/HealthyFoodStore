@@ -1965,6 +1965,7 @@
 	}
 
 	input[type="text"],
+	input[type="number"],
 	input[type="password"],
 	input[type="email"],
 	input[type="tel"],
@@ -1987,6 +1988,7 @@
 	}
 
 		input[type="text"]:invalid,
+		input[type="number"],
 		input[type="password"]:invalid,
 		input[type="email"]:invalid,
 		input[type="tel"]:invalid,
@@ -1996,6 +1998,7 @@
 		}
 
 		input[type="text"]:focus,
+		input[type="number"],
 		input[type="password"]:focus,
 		input[type="email"]:focus,
 		input[type="tel"]:focus,

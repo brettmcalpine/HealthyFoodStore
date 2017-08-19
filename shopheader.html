@@ -20,7 +20,7 @@
 			<div class="inner">
 				<a href="buy" class="logo"><strong>Healthy Food Store</strong></a>
 				<a href="account">Welcome, {{.U.Fname}}</a>
-				<a href="account">Balance ${{.U.Credit}}</a>
+				<a href="account">Balance ${{.U.Credit | printf "%.2f"}}</a>
 				<nav id="nav">
 					<a href="logout"><span class="icon fa-sign-out">Logout {{.U.Email}}</a>
 					<a href="buy"><span class="icon fa-cart-arrow-down"></span> Buy</a>

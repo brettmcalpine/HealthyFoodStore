@@ -172,13 +172,9 @@ func buyItem(n string, i string){
 
 	var tax float64 = 0.0
 
-	credit := userCredit(n)
+	charge := cost + tax
 
-	newcredit := credit - cost - tax
-
-	chargeUser(n, newcredit)
-
-	fmt.Println(userCredit(n))
+	chargeUser(n, charge)
 }
 
 func decreaseItemQuantity(i string) float64{
@@ -202,20 +198,29 @@ func decreaseItemQuantity(i string) float64{
 		}
 	}
 	r, _ := db.Prepare("update items set quantity = '" + strconv.Itoa(newqty) + "' where itemname = '" + i + "'")
-	fmt.Println(r)
 	r.Exec()
+	fmt.Print(i)
+	fmt.Print(" reduced to ")
+	fmt.Println(newqty)
 	return charge
 }
 
-func chargeUser(name string, newcredit float64){
+func chargeUser(name string, charge float64){
 
 	var db, _ = sql.Open("sqlite3", "users.sqlite3")
 	defer db.Close()
 
-	r, err := db.Prepare("update users set credit = '" + strconv.FormatFloat(newcredit, 'f', 2, 64) + "' where firstname = '" + name + "'")
-	fmt.Println(r)
+	credit := userCredit(name)
+
+	newcredit := credit - charge
+
+	r, _ := db.Prepare("update users set credit = ? where firstname = '" + name + "'")
 	r.Exec(newcredit)
-	fmt.Println(err)
+
+	fmt.Printf("User %s charged $%6.2f and has a final credit of $%6.2f\n", name, charge, newcredit)
+
+	fmt.Println(userCredit(name))
+
 }
 
 func userCredit(name string)float64{
@@ -239,6 +244,8 @@ func userCredit(name string)float64{
 /*func main(){  //for debugging I suppose
   fmt.Println("Welcome to the Healthy Food Store!")
   fmt.Println("----------------------------------\n")
+
+	buyItem("Brett","Coke")
 
 	j := Item{"Coke", 1.00, 30}
   if itemEmpty(&j){

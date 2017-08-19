@@ -53,8 +53,7 @@ func getUserDetails(r *http.Request) (u User) {
 			for q.Next(){
 				q.Scan(&em, &fn, &cr)
 				if em == email{
-					u := User{Fname: fn, Email: em, Credit: cr}
-					return u
+					u = User{Fname: fn, Email: em, Credit: cr}
 				}
 			}
 		}

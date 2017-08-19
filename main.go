@@ -112,6 +112,7 @@ func buy(w http.ResponseWriter, r *http.Request) {
 		i := r.FormValue("item")
 		firstname := getUserName(r)
 		buyItem(firstname, i)
+		http.Redirect(w, r, "/buy", 302)
 	}
 }
 
@@ -133,6 +134,10 @@ func sell(w http.ResponseWriter, r *http.Request) {
 		setMsg(w, "message", []byte("Please login first!"))
 		http.Redirect(w, r, "/", 302)
 	}
+}
+
+func CurrencyView (c float64)string{
+	return fmt.Sprintf("%.2f", c)
 }
 
 func main() {

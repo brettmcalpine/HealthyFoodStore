@@ -1,26 +1,28 @@
 {{define "buy"}}
 {{template "header" .}}
-  <div class="table-wrapper">
-    <table>
-      <thead>
-      <tr>
-        <th>Item (Click to buy 1)</th>
-        <th>Price (incl. <a href="help">tax</a>)</h>
-        <th>Stock <a href="shopkeeping">is this correct?</a></td>
-      </thead>
-      <tbody>
-        {{range .I}}
-        <tr>
-        <form action="/buy" method="post">
-          <td><button class="btn btn-warning" type="submit" value="{{.Itemname}}" name="item">{{.Itemname}}</button></td>
-        </form>
-        <td>${{.Value}}</td>
-        <td>{{.Quantity}}</td>
-        </tr>
-        {{end}}
-      </tbody>
-    </table>
+<section id="main" class="wrapper">
+  <div class="inner">
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <th>Item (Click to buy 1)</th>
+          <th>Price (incl. <a href="help">tax</a>)</h>
+          <th>Stock <a href="stocktake">is this correct?</a></th>
+        </thead>
+        <tbody>
+          {{range .I}}
+          <tr>
+          <form action="#" method="post">
+            <td><button class="btn btn-warning" type="submit" value="{{.Itemname}}" name="item">{{.Itemname}}</button></td>
+          </form>
+          <td>${{.Value}}</td>
+          <td>{{.Quantity}}</td>
+          </tr>
+          {{end}}
+        </tbody>
+      </table>
+    </div>
   </div>
-
+</section>
 {{template "footer" .}}
 {{end}}

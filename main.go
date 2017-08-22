@@ -145,8 +145,62 @@ func sell(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func CurrencyView (c float64)string{
-	return fmt.Sprintf("%.2f", c)
+func stocktakePage(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+		case "GET":
+	tmpl, _ := template.ParseFiles("stocktake.html", "shopheader.html", "footer.html")
+	userdata := getUserDetails(r)
+	firstname := getUserName(r)
+	items := listItems()
+	data := struct{
+		U User
+		I []Item
+	}{userdata, items}
+	if firstname != "" {
+		err := tmpl.ExecuteTemplate(w, "stocktake", data)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	} else {
+		setMsg(w, "message", []byte("Please login first!"))
+		http.Redirect(w, r, "/", 302)
+	}
+	case "POST":
+		i := r.FormValue("stocktake-item")
+		q := r.FormValue("stocktake-quantity")
+		firstname := getUserName(r)
+		stocktake(firstname, i, q)
+		http.Redirect(w, r, "/stocktake", 302)
+	}
+}
+
+func createPage(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+		case "GET":
+	tmpl, _ := template.ParseFiles("newitem.html", "shopheader.html", "footer.html")
+	userdata := getUserDetails(r)
+	firstname := getUserName(r)
+	items := listItems()
+	data := struct{
+		U User
+		I []Item
+	}{userdata, items}
+	if firstname != "" {
+		err := tmpl.ExecuteTemplate(w, "newitem", data)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	} else {
+		setMsg(w, "message", []byte("Please login first!"))
+		http.Redirect(w, r, "/", 302)
+	}
+	case "POST":
+		i := r.FormValue("create-name")
+		v := r.FormValue("create-value")
+		//firstname := getUserName(r)
+		createItem(i, v)
+		http.Redirect(w, r, "/buy", 302)
+	}
 }
 
 func main() {
@@ -155,6 +209,8 @@ func main() {
 	router.HandleFunc("/login", login).Methods("POST", "GET")
 	router.HandleFunc("/logout", logout).Methods("POST")
 	router.HandleFunc("/buy", buy).Methods("POST", "GET")
+	router.HandleFunc("/stocktake", stocktakePage).Methods("POST", "GET")
+	router.HandleFunc("/newitem", createPage).Methods("POST", "GET")
 	router.HandleFunc("/sell", sell)
 	router.HandleFunc("/signup", signup).Methods("POST", "GET")
 	http.Handle("/", router)

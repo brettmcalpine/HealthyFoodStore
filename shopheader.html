@@ -8,21 +8,25 @@
 {{ define "header"}}
 <html>
 	<head>
+		<title>Healthy Food Store</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<link rel="stylesheet" href="assets/css/main.css" />
-		<title>Healthy Food Store</title>
 		<link rel="icon" sizes="192x192" href="assets/images/favicon-192x192.png" type="image/png" />
 		<link rel="shortcut icon" href="assets/images/favicon.ico">
   </head>
-	<body>
+	<body class="subpage">
 		<header id="header">
 			<div class="inner">
 				<a href="buy" class="logo"><strong>Healthy Food Store</strong></a>
 				<a href="account">Welcome, {{.U.Fname}}</a>
 				<a href="account">Balance ${{.U.Credit | printf "%.2f"}}</a>
+			</div>
+
+
+			<div class="inner">
 				<nav id="nav">
-					<a href="logout"><span class="icon fa-sign-out">Logout {{.U.Email}}</a>
+					<a href="logout"><span class="icon fa-sign-out">Logout</a>
 					<a href="buy"><span class="icon fa-cart-arrow-down"></span> Buy</a>
 					<a href="sell"><span class="icon fa-money"></span> Sell</a>
 					<a href="shopkeeping"><span class="icon fa-sliders"> Shopkeeping</a>
@@ -30,7 +34,6 @@
 				</nav>
 				<a href="#navPanel" class="navPanelToggle"><span class="fa fa-bars"></span></a>
 			</div>
-		</header>
-			<section id="banner">
-			</section>
+			</header>
+
 {{end}}

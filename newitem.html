@@ -1,0 +1,21 @@
+{{define "newitem"}}
+{{template "header" .}}
+<section id="main" class="wrapper">
+  <div class="inner">
+    <form method="post" action="#">
+      <div>
+        <div>
+          <input type="text" name="create-name" id="create-name" placeholder="- Item Name -">
+        </div>
+        <div>
+          <input type="number" name="create-value" id="create-value" placeholder="- $ Value -">
+        </div>
+        <div>
+          <button class="btn btn-warning" type="submit">Create</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</section>
+{{template "footer" .}}
+{{end}}

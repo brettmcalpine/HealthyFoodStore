@@ -7,29 +7,31 @@
   <link rel="icon" sizes="192x192" href="assets/images/favicon-192x192.png" type="image/png" />
   <link rel="shortcut icon" href="assets/images/favicon.ico">
 </head>
-<div class="container">
-    <form method="POST" action="/signup">
-      <h1>Please enter your details:</h1>
-        <label class="form-control-label" for="fName">First Name</label>
-        <input class="form-control" type="text" id="fName" name="fName">
-        <br>
-        <label class="form-control-label" for="lName">Last Name</label>
-        <input class="form-control" type="text" id="lName" name="lName">
-        <br>
-        <label class="form-control-label" for="email">Email</label>
-        <input class="form-control" type="email" id="email" name="email">
-        <br>
-        <label class="form-control-label" for="password">Password</label>
-        <input class="form-control" type="password" id="password" name="password">
-        <br>
-        <button class="btn btn-primary" type="submit" name="signup">Submit</button>
+<section id="main" class="wrapper">
+  <div class="inner">
+      <form method="POST" action="/signup">
+        <h1>Please enter your details:</h1>
+          <label class="form-control-label" for="fName">First Name</label>
+          <input class="form-control" type="text" id="fName" name="fName">
+          <br>
+          <label class="form-control-label" for="lName">Last Name</label>
+          <input class="form-control" type="text" id="lName" name="lName">
+          <br>
+          <label class="form-control-label" for="email">Email</label>
+          <input class="form-control" type="email" id="email" name="email">
+          <br>
+          <label class="form-control-label" for="password">Password</label>
+          <input class="form-control" type="password" id="password" name="password">
+          <br>
+          <button class="btn btn-primary" type="submit" name="signup">Submit</button>
+      </form>
+  </div>
+  <div class="inner" align="center">
+    <form  method="GET" action="/login">
+      <h1>Or, if you already have an account:</h1>
+      <button class="btn btn-primary" type="submit">Log In</button>
     </form>
-</div>
-<div class="container">
-  <form  method="GET" action="/login">
-    <h1>Or, if you already have an account:</h1>
-    <button class="btn btn-primary" type="submit">Log In</button>
-  </form>
-</div>
+  </div>
+</section>
 {{template "footer" .}}
 {{end}}

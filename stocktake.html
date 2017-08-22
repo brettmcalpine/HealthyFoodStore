@@ -1,0 +1,32 @@
+{{define "stocktake"}}
+{{template "header" .}}
+<section id="main" class="wrapper">
+  <div class="inner">
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Current stock</th>
+            <th>New stock</th>
+            <th>Change</th>
+          </thead>
+          <tbody>
+            {{range .I}}
+            <tr>
+            <td>{{.Itemname}}</td>
+            <td>{{.Quantity}}</td>
+            <form action="/shopkeeping" method="post">
+            <td><input type="number" name="stocktake-quantity" id="stocktake-quantity" value="" placeholder="{{.Quantity}}" /></td>
+            <td>
+              <button class="button special" type="submit" value="{{.Itemname}}" name="stocktake-item">Take stock</button></td>
+            </form></td>
+            </tr>
+            {{end}}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+{{template "footer" .}}
+{{end}}

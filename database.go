@@ -105,13 +105,16 @@ func totalUserCredit() (float64, error){
   return totcash, err
 }
 
-func createItem(i *Item) error {
+func createItem(i string, v string) error {
+
+	value, _ := strconv.ParseFloat(v, 64)
+
 	var db, _ = sql.Open("sqlite3", "items.sqlite3")
 	defer db.Close()
 	db.Exec("create table if not exists items (itemname text, value text, quantity integer)")
 	tx, _ := db.Begin()
 	stmt, _ := tx.Prepare("insert into items (itemname, value, quantity) values (?, ?, ?)")
-	_, err := stmt.Exec(i.Itemname, i.Value, i.Quantity)
+	_, err := stmt.Exec(i, value, 0)
 	tx.Commit()
 	return err
 }
@@ -214,6 +217,37 @@ func changeItemQuantity(i string, q int) float64{
 	return charge
 }
 
+func itemDetails(i string) (float64, int){
+	var db, _ = sql.Open("sqlite3", "items.sqlite3")
+	defer db.Close()
+
+	x, _ := db.Query("select itemname, value, quantity from items")
+
+	var it string
+	var val float64
+	var qty int
+
+	var value float64
+	var currentQty int
+
+	for x.Next(){
+		x.Scan(&it, &val, &qty)
+		if it == i{
+			value = val
+			currentQty = qty
+		}
+	}
+	return value, currentQty
+}
+
+func stocktake(name string, i string, q string){
+	newquantity, _ := strconv.Atoi(q)
+	_, oldquantity := itemDetails(i)
+	quantityadjustment := newquantity - oldquantity
+	changeItemQuantity(i, quantityadjustment)
+	fmt.Printf("Name: %s\tItem: %s\tNew Qty: %d\n", name, i, newquantity)
+}
+
 func adjustUserCredit(name string, charge float64){
 
 	var db, _ = sql.Open("sqlite3", "users.sqlite3")
@@ -250,13 +284,6 @@ func userCredit(name string)float64{
 /*func main(){  //for debugging I suppose
   fmt.Println("Welcome to the Healthy Food Store!")
   fmt.Println("----------------------------------\n")
-
-	buyItem("Brett","Coke")
-
-	j := Item{"Coke", 1.00, 30}
-  if itemEmpty(&j){
-    createItem(&j)
-  }
 
   var assval, _ = assetValue()
   fmt.Print("Total asset value: $")

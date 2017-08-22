@@ -7,21 +7,25 @@
   <link rel="icon" sizes="192x192" href="assets/images/favicon-192x192.png" type="image/png" />
   <link rel="shortcut icon" href="assets/images/favicon.ico">
 </head>
-<div class="container">
+<section id="main" class="wrapper">
+  <div class="inner">
     <form method="POST" action="/login">
       <h1>Please enter your details:</h1>
         <label class="form-control-label" for="email">Email</label>
         <input class="form-control" type="text" id="email" name="email">
+        <br>
         <label class="form-control-label" for="password">Password</label>
         <input class="form-control" type="password" id="password" name="password">
+        <br>
         <button class="btn btn-primary" type="submit" name="login">Submit</button>
     </form>
 </div>
-<div class="container">
-  <form  method="GET" action="/signup">
-    <h1>Or, if you don't yet have an account:</h1>
-    <button class="btn btn-primary" type="submit">Sign Up</button>
-  </form>
-</div>
+  <div class="inner" align="center">
+    <form  method="GET" action="/signup">
+      <h1>Or, if you don't yet have an account:</h1>
+      <button class="btn btn-primary" type="submit">Sign Up</button>
+    </form>
+  </div>
+<section>
 {{template "footer" .}}
 {{end}}

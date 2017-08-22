@@ -1,0 +1,17 @@
+{{define "deleteuser"}}
+{{template "header" .}}
+<section id="main" class="wrapper">
+  <div class="inner">
+    <form method="post" action="#">
+      <input type="checkbox" id="delete-user" name="delete-user">
+      <label for="delete-user">Existence is pain!</label>
+          <br>
+          <p>You must have a positive balance to be deleted.</p>
+          <button class="btn btn-warning" type="submit">Delete Me</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</section>
+{{template "footer" .}}
+{{end}}

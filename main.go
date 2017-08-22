@@ -15,24 +15,6 @@ var cookieHandler = securecookie.New(
 
 var router = mux.NewRouter()
 
-func indexPage(w http.ResponseWriter, r *http.Request) {
-	msg, _ := getMsg(w, r, "message")
-	if msg != nil {
-		tmpl, _ := template.ParseFiles("base.html", "index.html", "login.html")
-		err := tmpl.ExecuteTemplate(w, "base", msg)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
-	} else {
-		u := &User{}
-		tmpl, _ := template.ParseFiles("base.html", "index.html", "login.html", "buy.html")
-		err := tmpl.ExecuteTemplate(w, "buy", u)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
-	}
-}
-
 func login(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
@@ -145,6 +127,26 @@ func sell(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func shopkeeping(w http.ResponseWriter, r *http.Request) {
+	tmpl, _ := template.ParseFiles("shopkeeping.html", "shopheader.html", "footer.html")
+	userdata := getUserDetails(r)
+	firstname := getUserName(r)
+	items := listItems()
+	data := struct{
+		U User
+		I []Item
+	}{userdata, items}
+	if firstname != "" {
+		err := tmpl.ExecuteTemplate(w, "shopkeeping", data)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	} else {
+		setMsg(w, "message", []byte("Please login first!"))
+		http.Redirect(w, r, "/", 302)
+	}
+}
+
 func stocktakePage(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 		case "GET":
@@ -203,15 +205,74 @@ func createPage(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func deleteItemPage(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+		case "GET":
+	tmpl, _ := template.ParseFiles("deleteitem.html", "shopheader.html", "footer.html")
+	userdata := getUserDetails(r)
+	firstname := getUserName(r)
+	items := listItems()
+	data := struct{
+		U User
+		I []Item
+	}{userdata, items}
+	if firstname != "" {
+		err := tmpl.ExecuteTemplate(w, "deleteitem", data)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	} else {
+		setMsg(w, "message", []byte("Please login first!"))
+		http.Redirect(w, r, "/", 302)
+	}
+	case "POST":
+		i := r.FormValue("delete-name")
+		//firstname := getUserName(r)
+		deleteItem(i)
+		http.Redirect(w, r, "/buy", 302)
+	}
+}
+
+func deleteUserPage(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+		case "GET":
+	tmpl, _ := template.ParseFiles("deleteuser.html", "shopheader.html", "footer.html")
+	userdata := getUserDetails(r)
+	firstname := getUserName(r)
+	items := listItems()
+	data := struct{
+		U User
+		I []Item
+	}{userdata, items}
+	if firstname != "" {
+		err := tmpl.ExecuteTemplate(w, "deleteuser", data)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	} else {
+		setMsg(w, "message", []byte("Please login first!"))
+		http.Redirect(w, r, "/", 302)
+	}
+	case "POST":
+		check := r.FormValue("delete-user")
+		firstname := getUserName(r)
+		deleteUser(firstname, check)
+		http.Redirect(w, r, "/signup", 302)
+	}
+}
+
 func main() {
 	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("assets"))))
 	router.HandleFunc("/", login)
 	router.HandleFunc("/login", login).Methods("POST", "GET")
 	router.HandleFunc("/logout", logout).Methods("POST")
 	router.HandleFunc("/buy", buy).Methods("POST", "GET")
+	router.HandleFunc("/shopkeeping", shopkeeping).Methods("POST", "GET")
 	router.HandleFunc("/stocktake", stocktakePage).Methods("POST", "GET")
 	router.HandleFunc("/newitem", createPage).Methods("POST", "GET")
-	router.HandleFunc("/sell", sell)
+	router.HandleFunc("/deleteitem", deleteItemPage).Methods("POST", "GET")
+	router.HandleFunc("/deleteuser", deleteUserPage).Methods("POST", "GET")
+	router.HandleFunc("/sell", sell).Methods("POST", "GET")
 	router.HandleFunc("/signup", signup).Methods("POST", "GET")
 	http.Handle("/", router)
 	http.ListenAndServe(":5050", nil)

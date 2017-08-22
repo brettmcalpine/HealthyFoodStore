@@ -105,6 +105,17 @@ func totalUserCredit() (float64, error){
   return totcash, err
 }
 
+func tax()float64{
+	cash, _ := totalUserCredit()
+	assets, _ := assetValue()
+	tax := cash/assets
+	fmt.Printf("Cash: %.2f Assets: %.2f Tax %.6f\n", cash, assets, tax)
+	if tax <= 1{
+		return 1
+	}
+	return tax
+}
+
 func createItem(i string, v string) error {
 
 	value, _ := strconv.ParseFloat(v, 64)
@@ -117,6 +128,30 @@ func createItem(i string, v string) error {
 	_, err := stmt.Exec(i, value, 0)
 	tx.Commit()
 	return err
+}
+
+func deleteItem(i string) error {
+	var db, _ = sql.Open("sqlite3", "items.sqlite3")
+	defer db.Close()
+	tx, _ := db.Begin()
+	stmt, _ := tx.Prepare("delete from items where (itemname, quantity) = (?, ?)")
+	_, err := stmt.Exec(i, 0)
+	tx.Commit()
+	return err
+}
+
+func deleteUser(firstname string, check string){
+	if check == "on"{
+		if userCredit(firstname)>0{
+			var db, _ = sql.Open("sqlite3", "users.sqlite3")
+			defer db.Close()
+			tx, _ := db.Begin()
+			stmt, _ := tx.Prepare("delete from users where firstname = ?")
+			stmt.Exec(firstname)
+			fmt.Printf("Bye Bye %s\n", firstname)
+			tx.Commit()
+		}
+	}
 }
 
 func itemEmpty(i *Item) bool {
@@ -171,13 +206,11 @@ func assetValue() (float64, error){
 
 func buyItem(n string, i string){
 
-	cost := changeItemQuantity(i, -1)
+	tax := tax()
 
-	var tax float64 = 0.0
+	charge := tax * changeItemQuantity(i, -1)
 
-	charge := -cost - tax
-
-	adjustUserCredit(n, charge)
+	adjustUserCredit(n, -charge)
 }
 
 func sellItems(n string, i string, q string){

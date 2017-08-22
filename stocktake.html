@@ -16,7 +16,7 @@
             <tr>
             <td>{{.Itemname}}</td>
             <td>{{.Quantity}}</td>
-            <form action="/shopkeeping" method="post">
+            <form action="/stocktake" method="post">
             <td><input type="number" name="stocktake-quantity" id="stocktake-quantity" value="" placeholder="{{.Quantity}}" /></td>
             <td>
               <button class="button special" type="submit" value="{{.Itemname}}" name="stocktake-item">Take stock</button></td>

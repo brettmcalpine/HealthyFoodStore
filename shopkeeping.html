@@ -1,0 +1,19 @@
+{{define "shopkeeping"}}
+{{template "header" .}}
+<section id="main" class="wrapper">
+  <div class="inner">
+    <div class="row">
+      <div class="6u 12u$(small)">
+        <h3>Taking Stock</h3>
+        <p>If you ever notice that the number of stock does not match the value in the Healthy Food Store site, you should adjust the stock to match. This will impact <a href="help">tax</a>.</p>
+        <a href="stocktake" class="button special">Take Stock</a>
+      </div>
+      <div class="6u$ 12u$(small)">
+        <h3>Add a new item</h3>
+        <p>If an item is missing, or you wish to change add a variant you should add an item. If the value of the item needs to be changed, wait until the current stock is exhausted and then <a href="deleteitem">delete</a> the old item before creating a new one.</p>
+        <a href="newitem" class="button special">Add Item</a>
+    </div>
+  </div>
+</section>
+{{template "footer" .}}
+{{end}}

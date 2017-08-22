@@ -1,0 +1,23 @@
+{{define "deleteitem"}}
+{{template "header" .}}
+<section id="main" class="wrapper">
+  <div class="inner">
+    <form method="post" action="#">
+      <div class="select-wrapper">
+        <select name="delete-name" id="delete-name">
+          <option value="">- Item to delete -</option>
+          {{range .I}}
+          <option value="{{.Itemname}}">{{.Itemname}}</option>
+          {{end}}
+        </select>
+      </div>
+          <br>
+          <p>This item must have 0 stock before it can be deleted.</p>
+          <button class="btn btn-warning" type="submit">Delete</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</section>
+{{template "footer" .}}
+{{end}}

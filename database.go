@@ -171,14 +171,17 @@ func itemEmpty(i *Item) bool {
   return true
 }
 
-func listItems() []Item{
+func listItems() ([]Item, error){
   var db, _ = sql.Open("sqlite3", "items.sqlite3")
   defer db.Close()
   var it string
   var val float64
   var qty int
 	var list_of_items []Item
-  q, _ := db.Query("select itemname, value, quantity from items")
+  q, err := db.Query("select itemname, value, quantity from items")
+	if err != nil{
+		return list_of_items, err
+	}
   for q.Next(){
     q.Scan(&it, &val, &qty)
 		var thing Item
@@ -187,7 +190,7 @@ func listItems() []Item{
 	  thing.Quantity = qty
 		list_of_items = append(list_of_items, thing)
   }
-  return list_of_items
+  return list_of_items, err
 }
 
 func assetValue() (float64, error){

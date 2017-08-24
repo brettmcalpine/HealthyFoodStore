@@ -15,7 +15,7 @@
           <form action="#" method="post">
             <td><button class="btn btn-warning" type="submit" value="{{.Itemname}}" name="item">{{.Itemname}}</button></td>
           </form>
-          <td>${{.Value}}</td>
+          <td>${{.Value | printf "%.2f"}}</td>
           <td>{{.Quantity}}</td>
           </tr>
           {{end}}

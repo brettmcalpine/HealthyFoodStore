@@ -76,7 +76,11 @@ func buy(w http.ResponseWriter, r *http.Request) {
 	tmpl, _ := template.ParseFiles("buy.html", "shopheader.html", "footer.html")
 	userdata := getUserDetails(r)
 	firstname := getUserName(r)
-	items := listItems()
+	items, err := listItems()
+	if err != nil{
+
+		http.Redirect(w, r, "/newitem", 302)
+	}
 	data := struct{
 		U User
 		I []Item
@@ -104,7 +108,7 @@ func sell(w http.ResponseWriter, r *http.Request) {
 	tmpl, _ := template.ParseFiles("sell.html", "shopheader.html", "footer.html")
 	userdata := getUserDetails(r)
 	firstname := getUserName(r)
-	items := listItems()
+	items, _ := listItems()
 	data := struct{
 		U User
 		I []Item
@@ -131,7 +135,7 @@ func shopkeeping(w http.ResponseWriter, r *http.Request) {
 	tmpl, _ := template.ParseFiles("shopkeeping.html", "shopheader.html", "footer.html")
 	userdata := getUserDetails(r)
 	firstname := getUserName(r)
-	items := listItems()
+	items, _ := listItems()
 	data := struct{
 		U User
 		I []Item
@@ -153,7 +157,7 @@ func stocktakePage(w http.ResponseWriter, r *http.Request) {
 	tmpl, _ := template.ParseFiles("stocktake.html", "shopheader.html", "footer.html")
 	userdata := getUserDetails(r)
 	firstname := getUserName(r)
-	items := listItems()
+	items, _ := listItems()
 	data := struct{
 		U User
 		I []Item
@@ -182,7 +186,7 @@ func createPage(w http.ResponseWriter, r *http.Request) {
 	tmpl, _ := template.ParseFiles("newitem.html", "shopheader.html", "footer.html")
 	userdata := getUserDetails(r)
 	firstname := getUserName(r)
-	items := listItems()
+	items, _ := listItems()
 	data := struct{
 		U User
 		I []Item
@@ -211,7 +215,7 @@ func deleteItemPage(w http.ResponseWriter, r *http.Request) {
 	tmpl, _ := template.ParseFiles("deleteitem.html", "shopheader.html", "footer.html")
 	userdata := getUserDetails(r)
 	firstname := getUserName(r)
-	items := listItems()
+	items, _ := listItems()
 	data := struct{
 		U User
 		I []Item
@@ -239,7 +243,7 @@ func deleteUserPage(w http.ResponseWriter, r *http.Request) {
 	tmpl, _ := template.ParseFiles("deleteuser.html", "shopheader.html", "footer.html")
 	userdata := getUserDetails(r)
 	firstname := getUserName(r)
-	items := listItems()
+	items, _ := listItems()
 	data := struct{
 		U User
 		I []Item

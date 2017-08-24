@@ -1,0 +1,41 @@
+{{define "account"}}
+{{template "header" .}}
+<section id="main" class="wrapper">
+  <div class="inner">
+    <div class ="row">
+      <div class="4u 12u$(small)">
+        <h3>Account Details</h3>
+        <p><strong>Name: </strong>{{.U.Fname}} {{.U.Lname}}</p>
+        <p><strong>Email: </strong>{{.U.Email}}</p>
+        <p><strong>Credit: </strong>${{.U.Credit | printf "%.2f"}}</p>
+      </div>
+      <div class="4u 12u$(small)">
+        <h3>Transfer Funds</h3>
+        <form method="post" action="#">
+          <div class="select-wrapper" align="center">
+            <select name="to-name" id="to-name">
+              <option value="">- Transfer to -</option>
+              {{range .S}}
+              <option value="{{.Fname}}">{{.Fname}} {{.Lname}} ${{.Credit | printf "%.2f"}}</option>
+              {{end}}
+            </select>
+          </div>
+          <div align="center">
+            <input type="number" step="0.01" name="dollars" id="dollars" placeholder="- $ Value -">
+            <br>
+            <p>Be careful!</p>
+            <button class="btn btn-warning" type="submit">Transfer</button>
+          </div>
+        </div>
+        <div class="4u 12u$(small)" align = "center">
+          <header>
+            <h3>Current Tax Rate</h3>
+            <h2>30%</h2>
+          </header>
+        </div>
+      </div>
+    </div>
+  </form>
+</section>
+{{template "footer" .}}
+{{end}}

@@ -47,13 +47,13 @@ func getUserDetails(r *http.Request) (u User) {
 			email := cookieValue["email"]
 			var db, _ = sql.Open("sqlite3", "users.sqlite3")
 		  defer db.Close()
-			var em, fn string
+			var em, fn, ln string
 			var cr float64
-			q, _ := db.Query("select email, firstname, credit from users")
+			q, _ := db.Query("select email, firstname, lastname, credit from users")
 			for q.Next(){
-				q.Scan(&em, &fn, &cr)
+				q.Scan(&em, &fn, &ln, &cr)
 				if em == email{
-					u = User{Fname: fn, Email: em, Credit: cr}
+					u = User{Fname: fn, Lname: ln, Email: em, Credit: cr}
 				}
 			}
 		}

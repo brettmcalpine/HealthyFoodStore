@@ -75,22 +75,26 @@ func createUser(u *User) error {
 	return err
 }
 
-func listUsers() error{
-  var db, _ = sql.Open("sqlite3", "users.sqlite3")
+func listUsers() ([]User, error){
+	var db, _ = sql.Open("sqlite3", "users.sqlite3")
   defer db.Close()
-  var em, fn string
-  var cash float64
-  q, err := db.Query("select email, firstname, credit from users")
+  var fn string
+  var ln string
+	var cr float64
+	var list_of_users []User
+  q, err := db.Query("select firstname, lastname, credit from users")
+	if err != nil{
+		return list_of_users, err
+	}
   for q.Next(){
-    q.Scan(&em, &fn, &cash)
-    fmt.Print("Email: ")
-    fmt.Print(em)
-    fmt.Print("\tName: ")
-    fmt.Print(fn)
-    fmt.Print("\tCredit: $")
-    fmt.Printf("%.2f\n",cash)
+    q.Scan(&fn, &ln, &cr)
+		var person User
+		person.Fname = fn
+	  person.Lname = ln
+	  person.Credit = cr
+		list_of_users = append(list_of_users, person)
   }
-  return err
+  return list_of_users, err
 }
 
 func totalUserCredit() (float64, error){
@@ -315,6 +319,10 @@ func userCredit(name string)float64{
 		}
 	}
 	return credit
+}
+
+func transferFunds(from string, to string, dollars string){
+
 }
 
 /*func main(){  //for debugging I suppose

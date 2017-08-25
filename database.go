@@ -112,10 +112,10 @@ func totalUserCredit() (float64, error){
 func tax()float64{
 	cash, _ := totalUserCredit()
 	assets, _ := assetValue()
-	tax := cash/assets
-	fmt.Printf("Cash: %.2f Assets: %.2f Tax %.6f\n", cash, assets, tax)
-	if tax <= 1{
-		return 1
+	tax := cash/assets - 1
+	fmt.Printf("Cash: %.2f Assets: %.2f Tax %.6f\n", cash, assets, tax*100)
+	if tax <= 0 || assets == 0{
+		return 0
 	}
 	return tax
 }
@@ -215,7 +215,9 @@ func buyItem(n string, i string){
 
 	tax := tax()
 
-	charge := tax * changeItemQuantity(i, -1)
+	cost := changeItemQuantity(i, -1)
+
+	charge := cost * (1 + tax)
 
 	adjustUserCredit(n, -charge)
 }
@@ -299,8 +301,6 @@ func adjustUserCredit(name string, charge float64){
 
 	r, _ := db.Prepare("update users set credit = ? where firstname = '" + name + "'")
 	r.Exec(newcredit)
-
-	fmt.Printf("User %s adjusted by $%6.2f and has a final credit of $%6.2f\n", name, charge, newcredit)
 }
 
 func userCredit(name string)float64{
@@ -322,7 +322,9 @@ func userCredit(name string)float64{
 }
 
 func transferFunds(from string, to string, dollars string){
-
+	transfer, _ := strconv.ParseFloat(dollars, 64)
+	adjustUserCredit(from, -transfer)
+	adjustUserCredit(to, transfer)
 }
 
 /*func main(){  //for debugging I suppose

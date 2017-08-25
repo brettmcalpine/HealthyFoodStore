@@ -216,10 +216,12 @@ func accountPage(w http.ResponseWriter, r *http.Request) {
 	userdata := getUserDetails(r)
 	firstname := getUserName(r)
 	users, _ := listUsers()
+	tax := tax()
 	data := struct{
 		U User
 		S []User
-	}{userdata, users}
+		T float64
+	}{userdata, users, tax*100}
 	if firstname != "" {
 		err := tmpl.ExecuteTemplate(w, "account", data)
 		if err != nil {

@@ -5,9 +5,9 @@ package main
 import (
 	"database/sql"
 	_ "github.com/mattn/go-sqlite3"
-  "fmt"
 	"time"
 	"strconv"
+	"fmt"
 )
 
 type User struct {
@@ -25,10 +25,14 @@ type Item struct{
 }
 
 type Transaction struct{
-  Date time.Time
-  User
-  Item
-	Tax float64
+  Timestamp time.Time
+	TType string //Transaction Type (Buy, Sell, Transfer, Stocktake, ItemAdd, ItemDelete, UserCreate, UserDelete, UserSetCredit)
+  Primary	string
+	Secondary string
+	Dollars float64
+  Unit string
+	Count int
+	Tax float64 //For this transaction
 }
 
 func userReal(u *User) bool {
@@ -78,17 +82,17 @@ func createUser(u *User) error {
 func listUsers() ([]User, error){
 	var db, _ = sql.Open("sqlite3", "users.sqlite3")
   defer db.Close()
-  var fn string
-  var ln string
+  var em, fn, ln string
 	var cr float64
 	var list_of_users []User
-  q, err := db.Query("select firstname, lastname, credit from users")
+  q, err := db.Query("select email, firstname, lastname, credit from users")
 	if err != nil{
 		return list_of_users, err
 	}
   for q.Next(){
-    q.Scan(&fn, &ln, &cr)
+    q.Scan(&em, &fn, &ln, &cr)
 		var person User
+		person.Email = em
 		person.Fname = fn
 	  person.Lname = ln
 	  person.Credit = cr
@@ -113,7 +117,6 @@ func tax()float64{
 	cash, _ := totalUserCredit()
 	assets, _ := assetValue()
 	tax := cash/assets - 1
-	fmt.Printf("Cash: %.2f Assets: %.2f Tax %.6f\n", cash, assets, tax*100)
 	if tax <= 0 || assets == 0{
 		return 0
 	}
@@ -152,7 +155,6 @@ func deleteUser(firstname string, check string){
 			tx, _ := db.Begin()
 			stmt, _ := tx.Prepare("delete from users where firstname = ?")
 			stmt.Exec(firstname)
-			fmt.Printf("Bye Bye %s\n", firstname)
 			tx.Commit()
 		}
 	}
@@ -255,7 +257,6 @@ func changeItemQuantity(i string, q int) float64{
 	}
 	r, _ := db.Prepare("update items set quantity = '" + strconv.Itoa(newqty) + "' where itemname = '" + i + "'")
 	r.Exec()
-	fmt.Sprintf("Item %s changed by %d to %d", i, q, newqty)
 	return charge
 }
 
@@ -287,7 +288,6 @@ func stocktake(name string, i string, q string){
 	_, oldquantity := itemDetails(i)
 	quantityadjustment := newquantity - oldquantity
 	changeItemQuantity(i, quantityadjustment)
-	fmt.Printf("Name: %s\tItem: %s\tNew Qty: %d\n", name, i, newquantity)
 }
 
 func adjustUserCredit(name string, charge float64){
@@ -325,21 +325,55 @@ func transferFunds(from string, to string, dollars string){
 	transfer, _ := strconv.ParseFloat(dollars, 64)
 	adjustUserCredit(from, -transfer)
 	adjustUserCredit(to, transfer)
+	time := time.Now()
+	log := Transaction{Timestamp:time, TType:"transfer", Primary:from, Secondary:to, Dollars:transfer, Unit:"", Count:0, Tax:0.0}
+	LogTransaction(log)
+}
+
+func LogTransaction(t Transaction) error{
+	var db, _ = sql.Open("sqlite3", "transactions.sqlite3?parseTime=true")
+	defer db.Close()
+	db.Exec("create table if not exists transactions (datetime timestamp, ttype text, primaryuser text, secondary text, dollars real, item text, count int, tax real)")
+	tx, _ := db.Begin()
+	stmt, _ := tx.Prepare("insert into transactions (datetime, ttype, primaryuser, secondary, dollars, item, count, tax) values (?, ?, ?, ?, ?, ?, ?, ?)")
+	_, err := stmt.Exec(t.Timestamp, t.TType, t.Primary, t.Secondary, t.Dollars, t.Unit, t.Count, t.Tax)
+	tx.Commit()
+	return err
+	}
+
+func listTransactions() ([]Transaction, error){
+  var db, _ = sql.Open("sqlite3", "transactions.sqlite3")
+  defer db.Close()
+  var tm time.Time
+  var tp, pr, sec, it string
+  var dol, tax float64
+	var cnt int
+	var list_of_transactions []Transaction
+  q, err := db.Query("select datetime, ttype, primaryuser, secondary, dollars, item, count, tax from transactions")
+	if err != nil{
+		return list_of_transactions, err
+	}
+  for q.Next(){
+    q.Scan(&tm, &tp, &pr, &sec, &dol, &it, &cnt, &tax)
+		var check Transaction
+		check.Timestamp = tm
+	  check.TType = tp
+	  check.Primary = pr
+		check.Secondary = sec
+		check.Dollars = dol
+		check.Unit = it
+		check.Count = cnt
+		check.Tax = tax
+		list_of_transactions = append(list_of_transactions, check)
+		fmt.Println(pr)
+  }
+  return list_of_transactions, err
 }
 
 /*func main(){  //for debugging I suppose
   fmt.Println("Welcome to the Healthy Food Store!")
   fmt.Println("----------------------------------\n")
 
-  var assval, _ = assetValue()
-  fmt.Print("Total asset value: $")
-  fmt.Printf("%.2f\n",assval)
-  fmt.Println("")
-
-  var totcash, _ = totalUserCredit()
-  fmt.Print("Total cash value: $")
-  fmt.Printf("%.2f\n",totcash)
-
-	listUsers()
-
+	listT, _ := listTransactions()
+	fmt.Printf("%+v\n", listT)
 }*/

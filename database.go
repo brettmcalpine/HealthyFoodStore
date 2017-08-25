@@ -7,7 +7,6 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"time"
 	"strconv"
-	"fmt"
 )
 
 type User struct {
@@ -27,8 +26,7 @@ type Item struct{
 type Transaction struct{
   Timestamp time.Time
 	TType string //Transaction Type (Buy, Sell, Transfer, Stocktake, ItemAdd, ItemDelete, UserCreate, UserDelete, UserSetCredit)
-  Primary	string
-	Secondary string
+  UID	string
 	Dollars float64
   Unit string
 	Count int
@@ -76,6 +74,11 @@ func createUser(u *User) error {
 	stmt, _ := tx.Prepare("insert into users (email, password, firstname, lastname, credit) values (?, ?, ?, ?, ?)")
 	_, err := stmt.Exec(u.Email, u.Password, u.Fname, u.Lname, u.Credit)
 	tx.Commit()
+
+	time := time.Now()
+	log := Transaction{Timestamp:time, TType:"usercreate", UID:u.Fname, Dollars:0, Unit:"", Count:0, Tax:0.0}
+	LogTransaction(log)
+
 	return err
 }
 
@@ -134,6 +137,11 @@ func createItem(i string, v string) error {
 	stmt, _ := tx.Prepare("insert into items (itemname, value, quantity) values (?, ?, ?)")
 	_, err := stmt.Exec(i, value, 0)
 	tx.Commit()
+
+	time := time.Now()
+	log := Transaction{Timestamp:time, TType:"itemcreate", UID:"", Dollars:value, Unit:i, Count:0, Tax:0.0}
+	LogTransaction(log)
+
 	return err
 }
 
@@ -144,6 +152,11 @@ func deleteItem(i string) error {
 	stmt, _ := tx.Prepare("delete from items where (itemname, quantity) = (?, ?)")
 	_, err := stmt.Exec(i, 0)
 	tx.Commit()
+
+	time := time.Now()
+	log := Transaction{Timestamp:time, TType:"itemdelete", UID:"", Dollars:0, Unit:i, Count:0, Tax:0.0}
+	LogTransaction(log)
+
 	return err
 }
 
@@ -155,6 +168,11 @@ func deleteUser(firstname string, check string){
 			tx, _ := db.Begin()
 			stmt, _ := tx.Prepare("delete from users where firstname = ?")
 			stmt.Exec(firstname)
+
+			time := time.Now()
+			log := Transaction{Timestamp:time, TType:"userdelete", UID:firstname, Dollars:0, Unit:"", Count:0, Tax:0.0}
+			LogTransaction(log)
+
 			tx.Commit()
 		}
 	}
@@ -216,23 +234,26 @@ func assetValue() (float64, error){
 func buyItem(n string, i string){
 
 	tax := tax()
-
 	cost := changeItemQuantity(i, -1)
-
 	charge := cost * (1 + tax)
-
 	adjustUserCredit(n, -charge)
+
+	time := time.Now()
+	logtax := cost*tax
+	log := Transaction{Timestamp:time, TType:"buy", UID:n, Dollars:cost, Unit:i, Count:-1, Tax:logtax}
+	LogTransaction(log)
 }
 
 func sellItems(n string, i string, q string){
 
 	quantity, _ := strconv.Atoi(q)
-
 	unitprice := changeItemQuantity(i, quantity)
-
 	price := unitprice*float64(quantity)
-
 	adjustUserCredit(n, price)
+
+	time := time.Now()
+	log := Transaction{Timestamp:time, TType:"sell", UID:n, Dollars:price, Unit:i, Count:quantity, Tax:0.0}
+	LogTransaction(log)
 }
 
 func changeItemQuantity(i string, q int) float64{
@@ -288,19 +309,25 @@ func stocktake(name string, i string, q string){
 	_, oldquantity := itemDetails(i)
 	quantityadjustment := newquantity - oldquantity
 	changeItemQuantity(i, quantityadjustment)
+	time := time.Now()
+	log := Transaction{Timestamp:time, TType:"stocktake", UID:name, Dollars:0, Unit:i, Count:quantityadjustment, Tax:0.0}
+	LogTransaction(log)
+
 }
 
 func adjustUserCredit(name string, charge float64){
-
 	var db, _ = sql.Open("sqlite3", "users.sqlite3")
 	defer db.Close()
 
 	credit := userCredit(name)
-
 	newcredit := credit + charge
 
 	r, _ := db.Prepare("update users set credit = ? where firstname = '" + name + "'")
 	r.Exec(newcredit)
+
+	time := time.Now()
+	log := Transaction{Timestamp:time, TType:"usersetcredit", UID:name, Dollars:charge, Unit:"", Count:0, Tax:0.0}
+	LogTransaction(log)
 }
 
 func userCredit(name string)float64{
@@ -325,18 +352,16 @@ func transferFunds(from string, to string, dollars string){
 	transfer, _ := strconv.ParseFloat(dollars, 64)
 	adjustUserCredit(from, -transfer)
 	adjustUserCredit(to, transfer)
-	time := time.Now()
-	log := Transaction{Timestamp:time, TType:"transfer", Primary:from, Secondary:to, Dollars:transfer, Unit:"", Count:0, Tax:0.0}
-	LogTransaction(log)
+
 }
 
 func LogTransaction(t Transaction) error{
 	var db, _ = sql.Open("sqlite3", "transactions.sqlite3?parseTime=true")
 	defer db.Close()
-	db.Exec("create table if not exists transactions (datetime timestamp, ttype text, primaryuser text, secondary text, dollars real, item text, count int, tax real)")
+	db.Exec("create table if not exists transactions (datetime timestamp, ttype text, uid text, dollars real, item text, count int, tax real)")
 	tx, _ := db.Begin()
-	stmt, _ := tx.Prepare("insert into transactions (datetime, ttype, primaryuser, secondary, dollars, item, count, tax) values (?, ?, ?, ?, ?, ?, ?, ?)")
-	_, err := stmt.Exec(t.Timestamp, t.TType, t.Primary, t.Secondary, t.Dollars, t.Unit, t.Count, t.Tax)
+	stmt, _ := tx.Prepare("insert into transactions (datetime, ttype, uid, dollars, item, count, tax) values (?, ?, ?, ?, ?, ?, ?)")
+	_, err := stmt.Exec(t.Timestamp, t.TType, t.UID, t.Dollars, t.Unit, t.Count, t.Tax)
 	tx.Commit()
 	return err
 	}
@@ -345,27 +370,25 @@ func listTransactions() ([]Transaction, error){
   var db, _ = sql.Open("sqlite3", "transactions.sqlite3")
   defer db.Close()
   var tm time.Time
-  var tp, pr, sec, it string
+  var tp, id, it string
   var dol, tax float64
 	var cnt int
 	var list_of_transactions []Transaction
-  q, err := db.Query("select datetime, ttype, primaryuser, secondary, dollars, item, count, tax from transactions")
+  q, err := db.Query("select datetime, ttype, uid, dollars, item, count, tax from transactions")
 	if err != nil{
 		return list_of_transactions, err
 	}
   for q.Next(){
-    q.Scan(&tm, &tp, &pr, &sec, &dol, &it, &cnt, &tax)
+    q.Scan(&tm, &tp, &id, &dol, &it, &cnt, &tax)
 		var check Transaction
 		check.Timestamp = tm
 	  check.TType = tp
-	  check.Primary = pr
-		check.Secondary = sec
+	  check.UID = id
 		check.Dollars = dol
 		check.Unit = it
 		check.Count = cnt
 		check.Tax = tax
 		list_of_transactions = append(list_of_transactions, check)
-		fmt.Println(pr)
   }
   return list_of_transactions, err
 }

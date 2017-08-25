@@ -151,6 +151,26 @@ func shopkeeping(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func logPage(w http.ResponseWriter, r *http.Request) {
+	tmpl, _ := template.ParseFiles("logfiles.html", "shopheader.html", "footer.html")
+	userdata := getUserDetails(r)
+	firstname := getUserName(r)
+	transactions, _ := listTransactions()
+	data := struct{
+		U User
+		T []Transaction
+	}{userdata, transactions}
+	if firstname != "" {
+		err := tmpl.ExecuteTemplate(w, "logfiles", data)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	} else {
+		setMsg(w, "message", []byte("Please login first!"))
+		http.Redirect(w, r, "/", 302)
+	}
+}
+
 func stocktakePage(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 		case "GET":
@@ -186,11 +206,9 @@ func createPage(w http.ResponseWriter, r *http.Request) {
 	tmpl, _ := template.ParseFiles("newitem.html", "shopheader.html", "footer.html")
 	userdata := getUserDetails(r)
 	firstname := getUserName(r)
-	items, _ := listItems()
 	data := struct{
 		U User
-		I []Item
-	}{userdata, items}
+	}{userdata}
 	if firstname != "" {
 		err := tmpl.ExecuteTemplate(w, "newitem", data)
 		if err != nil {
@@ -310,6 +328,7 @@ func main() {
 	router.HandleFunc("/deleteuser", deleteUserPage).Methods("POST", "GET")
 	router.HandleFunc("/account", accountPage).Methods("POST", "GET")
 	router.HandleFunc("/signup", signup).Methods("POST", "GET")
+	router.HandleFunc("/logfiles", logPage).Methods("POST", "GET")
 	http.Handle("/", router)
 	http.ListenAndServe(":5050", nil)
 }

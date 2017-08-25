@@ -1,0 +1,35 @@
+{{define "logfiles"}}
+{{template "header" .}}
+<section id="main" class="wrapper">
+  <div class="inner">
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Date/Time</th>
+            <th>Type</th>
+            <th>User</th>
+            <th>Dollars</th>
+            <th>Item</th>
+            <th>Quantity</th>
+            <th>Tax</th>
+          </thead>
+          <tbody>
+            {{range .T}}
+            <tr>
+            <td>{{.Timestamp}}</td>
+            <td>{{.TType}}</td>
+            <td>{{.UID}}</td>
+            <td>{{.Dollars}}</td>
+            <td>{{.Unit}}</td>
+            <td>{{.Count}}</td>
+            <td>{{.Tax}}</td>
+            </tr>
+            {{end}}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+{{template "footer" .}}
+{{end}}

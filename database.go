@@ -7,6 +7,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"time"
 	"strconv"
+	"fmt"
 )
 
 type User struct {
@@ -309,6 +310,7 @@ func stocktake(name string, i string, q string){
 	_, oldquantity := itemDetails(i)
 	quantityadjustment := newquantity - oldquantity
 	changeItemQuantity(i, quantityadjustment)
+
 	time := time.Now()
 	log := Transaction{Timestamp:time, TType:"stocktake", UID:name, Dollars:0, Unit:i, Count:quantityadjustment, Tax:0.0}
 	LogTransaction(log)
@@ -324,10 +326,6 @@ func adjustUserCredit(name string, charge float64){
 
 	r, _ := db.Prepare("update users set credit = ? where firstname = '" + name + "'")
 	r.Exec(newcredit)
-
-	time := time.Now()
-	log := Transaction{Timestamp:time, TType:"usersetcredit", UID:name, Dollars:charge, Unit:"", Count:0, Tax:0.0}
-	LogTransaction(log)
 }
 
 func userCredit(name string)float64{
@@ -356,7 +354,7 @@ func transferFunds(from string, to string, dollars string){
 }
 
 func LogTransaction(t Transaction) error{
-	var db, _ = sql.Open("sqlite3", "transactions.sqlite3?parseTime=true")
+	var db, _ = sql.Open("sqlite3", "transactions.sqlite3")
 	defer db.Close()
 	db.Exec("create table if not exists transactions (datetime timestamp, ttype text, uid text, dollars real, item text, count int, tax real)")
 	tx, _ := db.Begin()
@@ -364,7 +362,54 @@ func LogTransaction(t Transaction) error{
 	_, err := stmt.Exec(t.Timestamp, t.TType, t.UID, t.Dollars, t.Unit, t.Count, t.Tax)
 	tx.Commit()
 	return err
+}
+
+func undoTransaction(date string){
+
+	var db, _ = sql.Open("sqlite3", "transactions.sqlite3")
+
+	var fn, it, tt string
+	var cnt int
+	var dol, tax float64
+	var tm time.Time
+
+	var t Transaction
+
+	dumbtime, _ := time.Parse("2006-01-02 15:04:05.999999 -0700 -0700", date)
+
+	y, _ := db.Query("select datetime, ttype, uid, dollars, item, count, tax from transactions") // where datetime = " + t.Timestamp
+	for y.Next(){
+		y.Scan(&tm, &tt, &fn, &dol, &it, &cnt, &tax)
+			t.Timestamp = tm
+			t.TType = tt
+			t.UID = fn
+			t.Dollars = dol
+			t.Unit = it
+			t.Count = cnt
+			t.Tax = tax
+			if t.Timestamp.Equal(dumbtime){
+				break
+			}
+		}
+	db.Close()
+
+	if t.TType == "sell"{
+		changeItemQuantity(t.Unit, -t.Count)
+		adjustUserCredit(t.UID, -t.Dollars)
+		time := time.Now()
+		log := Transaction{Timestamp:time, TType:"undosell", UID:t.UID, Dollars:t.Dollars, Unit:t.Unit, Count:t.Count, Tax:t.Tax}
+		fmt.Println("Fuck?")
+		LogTransaction(log)
 	}
+	if t.TType == "buy"{
+		changeItemQuantity(t.Unit, -t.Count)
+		cost := t.Dollars + t.Tax
+		adjustUserCredit(t.UID, cost)
+		time := time.Now()
+		log := Transaction{Timestamp:time, TType:"undobuy", UID:t.UID, Dollars:cost, Unit:t.Unit, Count:t.Count, Tax:t.Tax}
+		LogTransaction(log)
+	}
+}
 
 func listTransactions() ([]Transaction, error){
   var db, _ = sql.Open("sqlite3", "transactions.sqlite3")

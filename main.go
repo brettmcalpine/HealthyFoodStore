@@ -152,23 +152,30 @@ func shopkeeping(w http.ResponseWriter, r *http.Request) {
 }
 
 func logPage(w http.ResponseWriter, r *http.Request) {
-	tmpl, _ := template.ParseFiles("logfiles.html", "shopheader.html", "footer.html")
-	userdata := getUserDetails(r)
-	firstname := getUserName(r)
-	transactions, _ := listTransactions()
-	data := struct{
-		U User
-		T []Transaction
-	}{userdata, transactions}
-	if firstname != "" {
-		err := tmpl.ExecuteTemplate(w, "logfiles", data)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+	switch r.Method {
+		case "GET":
+		tmpl, _ := template.ParseFiles("logfiles.html", "shopheader.html", "footer.html")
+		userdata := getUserDetails(r)
+		firstname := getUserName(r)
+		transactions, _ := listTransactions()
+		data := struct{
+			U User
+			T []Transaction
+		}{userdata, transactions}
+		if firstname != "" {
+			err := tmpl.ExecuteTemplate(w, "logfiles", data)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+			}
+		} else {
+			setMsg(w, "message", []byte("Please login first!"))
+			http.Redirect(w, r, "/", 302)
 		}
-	} else {
-		setMsg(w, "message", []byte("Please login first!"))
-		http.Redirect(w, r, "/", 302)
-	}
+		case "POST":
+			u := r.FormValue("transaction-timestamp")
+			undoTransaction(u)
+			http.Redirect(w, r, "/logfiles", 302)
+		}
 }
 
 func stocktakePage(w http.ResponseWriter, r *http.Request) {

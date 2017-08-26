@@ -13,19 +13,23 @@
             <th>Item</th>
             <th>Quantity</th>
             <th>Tax</th>
+            <th>Undo?</th>
           </thead>
           <tbody>
+            <form method="post" action="#">
             {{range .T}}
             <tr>
-            <td>{{.Timestamp}}</td>
+            <td>{{.Timestamp.Format "2006-01-02 15:04:05"}}</td>
             <td>{{.TType}}</td>
             <td>{{.UID}}</td>
-            <td>{{.Dollars}}</td>
+            <td>${{.Dollars | printf "%.2f"}}</td>
             <td>{{.Unit}}</td>
             <td>{{.Count}}</td>
-            <td>{{.Tax}}</td>
+            <td>${{.Tax | printf "%.2f"}}</td>
+            <td><button class="btn btn-warning" type="submit" value="{{.Timestamp}}" name="transaction-timestamp">Undo</button></td>
             </tr>
             {{end}}
+          </form>
           </tbody>
         </table>
       </div>

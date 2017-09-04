@@ -1,0 +1,33 @@
+{{define "setcredit"}}
+{{template "header" .}}
+<section id="main" class="wrapper">
+  <div class="inner">
+    <div class ="row">
+      <div class="6u 12u$(small)">
+        <h3>Using this page</h3>
+        <p>Don't use this page for anything other than setting credit for a new instance of the Healthy Food Store where the starting balances will be incorrect</p>
+      </div>
+      <div class="6u 12u$(small)">
+        <h3>Set Credit</h3>
+        <form method="post" action="#">
+          <div class="select-wrapper" align="center">
+            <select name="user-name" id="user-name">
+              <option value="">- User to apply new balance -</option>
+              {{range .S}}
+              <option value="{{.Fname}}">{{.Fname}} {{.Lname}} ${{.Credit | printf "%.2f"}}</option>
+              {{end}}
+            </select>
+          </div>
+          <div align="center">
+            <input type="number" step="0.01" name="user-credit" id="user-credit" placeholder="- $ Value -">
+            <br>
+            <p>Have you double checked this is correct?</p>
+            <button class="btn btn-warning" type="submit">Set</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+</section>
+{{template "footer" .}}
+{{end}}

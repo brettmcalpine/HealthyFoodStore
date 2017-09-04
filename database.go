@@ -128,7 +128,6 @@ func tax()float64{
 }
 
 func createItem(i string, v string) error {
-
 	value, _ := strconv.ParseFloat(v, 64)
 
 	var db, _ = sql.Open("sqlite3", "items.sqlite3")
@@ -314,7 +313,6 @@ func stocktake(name string, i string, q string){
 	time := time.Now()
 	log := Transaction{Timestamp:time, TType:"stocktake", UID:name, Dollars:0, Unit:i, Count:quantityadjustment, Tax:0.0}
 	LogTransaction(log)
-
 }
 
 func adjustUserCredit(name string, charge float64){
@@ -326,6 +324,22 @@ func adjustUserCredit(name string, charge float64){
 
 	r, _ := db.Prepare("update users set credit = ? where firstname = '" + name + "'")
 	r.Exec(newcredit)
+}
+
+func setUserCredit(name string, credit string){
+	if name != "" {
+		var db, _ = sql.Open("sqlite3", "users.sqlite3")
+		defer db.Close()
+
+		newcredit, _ := strconv.ParseFloat(credit, 64)
+
+		r, _ := db.Prepare("update users set credit = ? where firstname = ?")
+		r.Exec(newcredit, name)
+
+		time := time.Now()
+		log := Transaction{Timestamp:time, TType:"setcredit", UID:name, Dollars:newcredit, Unit:"", Count:0, Tax:0.0}
+		LogTransaction(log)
+	}
 }
 
 func userCredit(name string)float64{
@@ -419,7 +433,7 @@ func listTransactions() ([]Transaction, error){
   var dol, tax float64
 	var cnt int
 	var list_of_transactions []Transaction
-  q, err := db.Query("select datetime, ttype, uid, dollars, item, count, tax from transactions")
+  q, err := db.Query("select datetime, ttype, uid, dollars, item, count, tax from transactions order by datetime DESC limit 10")
 	if err != nil{
 		return list_of_transactions, err
 	}
